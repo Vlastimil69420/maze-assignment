@@ -11,6 +11,7 @@ import javax.swing.JPanel;
  * The cell size is worked out from the panel size every time it is
  * painted, so any maze dimension fits and resizing the window works.
  * Colours: light grey = not carved yet, white = carved passage,
+ * green = the cell the generator or solver is working on,
  * light blue = explored by the solver, orange = the shortest path.
  *
  * @author Vlastimil Finger (B00176858)
@@ -24,9 +25,11 @@ public class MazePanel extends JPanel
   private static final Color OPEN = Color.WHITE;
   private static final Color EXPLORED = new Color(173, 216, 230);
   private static final Color PATH = Color.ORANGE;
+  private static final Color CURRENT = Color.GREEN;
   private static final Color WALL = Color.BLACK;
 
   private Grid grid;
+  private MazeGenerator generator;
   private MazeSolver solver;
 
   public MazePanel()
@@ -38,6 +41,12 @@ public class MazePanel extends JPanel
   public void setGrid(Grid grid)
   {
     this.grid = grid;
+    repaint();
+  }
+
+  public void setGenerator(MazeGenerator generator)
+  {
+    this.generator = generator;
     repaint();
   }
 
@@ -86,6 +95,12 @@ public class MazePanel extends JPanel
         g.fillRect(x0 + cell.getCol() * size, y0 + cell.getRow() * size, size, size);
       }
     }
+    Cell current = getCurrent();
+    if (current != null)
+    {
+      g.setColor(CURRENT);
+      g.fillRect(x0 + current.getCol() * size, y0 + current.getRow() * size, size, size);
+    }
 
     Graphics2D g2 = (Graphics2D) g;
     g2.setColor(WALL);
@@ -115,6 +130,23 @@ public class MazePanel extends JPanel
         }
       }
     }
+  }
+
+  /**
+   * Returns the cell being worked on, or null when nothing is running.
+   */
+
+  private Cell getCurrent()
+  {
+    if (solver != null)
+    {
+      return solver.getCurrent();
+    }
+    if (generator != null)
+    {
+      return generator.getCurrent();
+    }
+    return null;
   }
 
   /**
