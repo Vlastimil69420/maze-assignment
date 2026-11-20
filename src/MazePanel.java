@@ -10,7 +10,8 @@ import javax.swing.JPanel;
  * Custom drawing panel that renders the grid and its walls.
  * The cell size is worked out from the panel size every time it is
  * painted, so any maze dimension fits and resizing the window works.
- * Colours: light grey = not carved yet, white = carved passage.
+ * Colours: light grey = not carved yet, white = carved passage,
+ * light blue = explored by the solver, orange = the shortest path.
  *
  * @author Vlastimil Finger (B00176858)
  */
@@ -21,9 +22,12 @@ public class MazePanel extends JPanel
   private static final int MARGIN = 10;
   private static final Color UNVISITED = Color.LIGHT_GRAY;
   private static final Color OPEN = Color.WHITE;
+  private static final Color EXPLORED = new Color(173, 216, 230);
+  private static final Color PATH = Color.ORANGE;
   private static final Color WALL = Color.BLACK;
 
   private Grid grid;
+  private MazeSolver solver;
 
   public MazePanel()
   {
@@ -34,6 +38,17 @@ public class MazePanel extends JPanel
   public void setGrid(Grid grid)
   {
     this.grid = grid;
+    repaint();
+  }
+
+  /**
+   * Set to null while the maze is being generated. Once a solver is
+   * set, a visited cell means explored by the solver.
+   */
+
+  public void setSolver(MazeSolver solver)
+  {
+    this.solver = solver;
     repaint();
   }
 
@@ -59,9 +74,16 @@ public class MazePanel extends JPanel
     {
       for (int c = 0; c < cols; c++)
       {
-        Cell cell = grid.getCell(r, c);
-        g.setColor(cell.isVisited() ? OPEN : UNVISITED);
+        g.setColor(colourOf(grid.getCell(r, c)));
         g.fillRect(x0 + c * size, y0 + r * size, size, size);
+      }
+    }
+    if (solver != null)
+    {
+      g.setColor(PATH);
+      for (Cell cell : solver.getPath())
+      {
+        g.fillRect(x0 + cell.getCol() * size, y0 + cell.getRow() * size, size, size);
       }
     }
 
@@ -93,6 +115,20 @@ public class MazePanel extends JPanel
         }
       }
     }
+  }
+
+  /**
+   * Visited means carved while generating, but explored while solving,
+   * because the solver resets the visited flags before it starts.
+   */
+
+  private Color colourOf(Cell cell)
+  {
+    if (solver != null)
+    {
+      return cell.isVisited() ? EXPLORED : OPEN;
+    }
+    return cell.isVisited() ? OPEN : UNVISITED;
   }
 
 }  // end MazePanel
