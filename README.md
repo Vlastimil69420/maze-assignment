@@ -16,7 +16,9 @@ Breadth-First Search with a queue, and shows both step by step in a Java Swing w
 To run the tests, right-click `MazeTest.java` and choose Run As > Java Application.
 
 ### Command line
+From the project folder:
 ```
+cd src
 javac *.java
 java MazeApp
 java MazeTest
