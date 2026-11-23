@@ -13,6 +13,8 @@ import java.util.ArrayList;
  * parent[r][c] stores the cell that cell (r, c) was reached from.
  * When the exit is found, following the parents back from the exit
  * to the start gives the path.
+ * inQueue[r][c] is true while cell (r, c) is waiting in the queue, so
+ * the panel can show the edge of the search as it spreads out.
  *
  * @author Vlastimil Finger (B00176858)
  */
@@ -26,6 +28,7 @@ public class MazeSolver
   private Cell current;
   private ArrayList<Cell> path;
   private boolean done;
+  private boolean[][] inQueue;
 
   public MazeSolver(Grid grid)
   {
@@ -34,11 +37,13 @@ public class MazeSolver
     parent = new Cell[grid.getRows()][grid.getCols()];
     path = new ArrayList<Cell>();
     done = false;
+    inQueue = new boolean[grid.getRows()][grid.getCols()];
     grid.resetVisited();                     // the generator left every cell visited
     Cell start = grid.getCell(0, 0);
     exit = grid.getCell(grid.getRows() - 1, grid.getCols() - 1);
     start.setVisited(true);
     queue.enqueue(start);
+    inQueue[0][0] = true;
   }  // end constructor
 
   public boolean isDone()
@@ -70,6 +75,16 @@ public class MazeSolver
   }
 
   /**
+   * True while c is waiting in the queue. Once solving has finished
+   * the search has stopped, so nothing counts as waiting any more.
+   */
+
+  public boolean isInQueue(Cell c)
+  {
+    return !done && inQueue[c.getRow()][c.getCol()];
+  }
+
+  /**
    * Takes the next cell off the queue and adds its unvisited open
    * neighbours to the back of the queue. Cells are marked visited when
    * they are added, so no cell is ever in the queue twice.
@@ -87,6 +102,7 @@ public class MazeSolver
       return;
     }
     current = (Cell) queue.dequeue();
+    inQueue[current.getRow()][current.getCol()] = false;
     if (current == exit)
     {
       buildPath();
@@ -100,6 +116,7 @@ public class MazeSolver
         n.setVisited(true);
         parent[n.getRow()][n.getCol()] = current;
         queue.enqueue(n);
+        inQueue[n.getRow()][n.getCol()] = true;
       }
     }
   }

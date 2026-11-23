@@ -28,7 +28,8 @@ java MazeTest
 
 - Light grey: not carved yet
 - White: carved passage
-- Green: the cell the generator or solver is working on
+- Light green: cells on the generator's stack or in the solver's queue
+- Dark green: the cell the generator or solver is working on
 - Light blue: explored by the solver
 - Orange: the shortest path from the start to the exit
 

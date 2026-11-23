@@ -15,6 +15,8 @@ import java.util.Random;
  * When the stack is empty every cell has been visited. Every wall
  * that is knocked down leads to a new, unvisited cell, so no loops
  * can form and there is exactly one path between any two cells.
+ * onStack[r][c] is true while cell (r, c) is on the stack, so the
+ * panel can show the cells the generator is still working through.
  *
  * @author Vlastimil Finger (B00176858)
  */
@@ -24,15 +26,18 @@ public class MazeGenerator
   private Grid grid;
   private StackReferenceBased stack;
   private Random random;
+  private boolean[][] onStack;
 
   public MazeGenerator(Grid grid)
   {
     this.grid = grid;
     stack = new StackReferenceBased();
     random = new Random();
+    onStack = new boolean[grid.getRows()][grid.getCols()];
     Cell start = grid.getCell(0, 0);
     start.setVisited(true);
     stack.push(start);
+    onStack[0][0] = true;
   }  // end constructor
 
   public boolean isDone()
@@ -52,6 +57,11 @@ public class MazeGenerator
       return null;
     }
     return (Cell) stack.peek();
+  }
+
+  public boolean isOnStack(Cell c)
+  {
+    return onStack[c.getRow()][c.getCol()];
   }
 
   /**
@@ -76,6 +86,7 @@ public class MazeGenerator
     if (unvisited.isEmpty())
     {
       stack.pop();                     // dead end, go back one cell
+      onStack[current.getRow()][current.getCol()] = false;
     }
     else
     {
@@ -83,6 +94,7 @@ public class MazeGenerator
       grid.removeWallBetween(current, next);
       next.setVisited(true);
       stack.push(next);
+      onStack[next.getRow()][next.getCol()] = true;
     }
   }
 

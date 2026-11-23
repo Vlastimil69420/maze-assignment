@@ -11,7 +11,8 @@ import javax.swing.JPanel;
  * The cell size is worked out from the panel size every time it is
  * painted, so any maze dimension fits and resizing the window works.
  * Colours: light grey = not carved yet, white = carved passage,
- * green = the cell the generator or solver is working on,
+ * light green = on the generator's stack or in the solver's queue,
+ * dark green = the cell the generator or solver is working on,
  * light blue = explored by the solver, orange = the shortest path.
  *
  * @author Vlastimil Finger (B00176858)
@@ -25,7 +26,8 @@ public class MazePanel extends JPanel
   private static final Color OPEN = Color.WHITE;
   private static final Color EXPLORED = new Color(173, 216, 230);
   private static final Color PATH = Color.ORANGE;
-  private static final Color CURRENT = Color.GREEN;
+  private static final Color ACTIVE = new Color(144, 238, 144);
+  private static final Color CURRENT = new Color(0, 160, 0);
   private static final Color WALL = Color.BLACK;
 
   private Grid grid;
@@ -152,13 +154,22 @@ public class MazePanel extends JPanel
   /**
    * Visited means carved while generating, but explored while solving,
    * because the solver resets the visited flags before it starts.
+   * Cells still on the stack or in the queue are shown as active.
    */
 
   private Color colourOf(Cell cell)
   {
     if (solver != null)
     {
+      if (solver.isInQueue(cell))
+      {
+        return ACTIVE;
+      }
       return cell.isVisited() ? EXPLORED : OPEN;
+    }
+    if (generator != null && generator.isOnStack(cell))
+    {
+      return ACTIVE;
     }
     return cell.isVisited() ? OPEN : UNVISITED;
   }
